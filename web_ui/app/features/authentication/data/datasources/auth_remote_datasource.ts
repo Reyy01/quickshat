@@ -1,8 +1,8 @@
 import axios, { AxiosError } from "axios";
 import { LoginUserDto } from "../dto/LoginUser.dto";
 import { LoginDatasDto } from "../dto/LoginData.dto";
-import { config } from "../../../../core/config";
 import axiosInstance from "@/app/core/interceptor";
+import { config } from "@/app/core/config";
 
 export class AuthRemoteDatasource {
   async loginUser(loginUserDto: LoginUserDto): Promise<LoginDatasDto> {

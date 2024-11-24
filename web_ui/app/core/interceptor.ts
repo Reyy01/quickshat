@@ -69,7 +69,7 @@ export class AuthenticationInterceptor {
   }
 
   private getAccessToken(): string {
-    return this.storage.getItem("ACCESS_TOKEN") || "";
+    return this.storage.getItem("access_token") || "";
   }
 
   private logoutUser(): Promise<void> {

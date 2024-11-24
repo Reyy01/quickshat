@@ -6,12 +6,16 @@ import { LoginUserDto } from "../../data/dto/LoginUser.dto";
 import { Pages, StateStatus } from "@/app/core/types";
 import { LoginUserUsecase } from "../../domain/usecases/login_user.usecase";
 import { SetSegmentUsecase } from "../../domain/usecases/set_segment.usecase";
+import { useDispatch } from 'react-redux';
 
 interface LoginPageProps {}
 
 export const LoginPage: React.FC<LoginPageProps> = () => {
+  // use cases
   const loginUserUsecase = new LoginUserUsecase();
   const setSegmentUsecase = new SetSegmentUsecase();
+
+  const dispatch = useDispatch();
 
   const { stateStatus, errorMessage, loginDatas } = useAppSelector((state) => state.auth);
   const [username, setUsername] = useState<string>('');
@@ -22,7 +26,7 @@ export const LoginPage: React.FC<LoginPageProps> = () => {
       userName: username,
       password: password,
     };
-    loginUserUsecase.execute(loginDto);
+    loginUserUsecase.execute(loginDto, dispatch);
   };
 
 
