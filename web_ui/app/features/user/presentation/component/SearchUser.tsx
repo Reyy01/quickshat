@@ -11,6 +11,7 @@ interface SearchUserComponentProps {}
 export const SearchUserComponent : React.FC<SearchUserComponentProps> = () => {
   const dispatch = useDispatch();
   // usecases
+  //
   const searchUserUsecase = new SearchUserUsecase();
 
   //selectors
