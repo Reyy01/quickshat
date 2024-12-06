@@ -6,6 +6,7 @@ import { Observable } from "rxjs";
 
 export interface ChatRepository {
   connectChatStream(): Observable<Result<ConversationsDto>>;
+  disposeChatStream(): Promise<Result<void>>;
   getConversation(page: number): Promise<Result<ConversationDataDto>>;
   getConversations(
     conversationsId: string,

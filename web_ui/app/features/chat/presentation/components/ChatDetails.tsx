@@ -16,8 +16,19 @@ export const ChatDetails: React.FC<ChatDetailsProps> = () => {
   return (
     <div className="w-80 border-l border-gray-200 h-screen overflow-y-auto">
       <div className="p-4 text-center border-b border-gray-200">
-        <div className="w-20 h-20 rounded-full bg-gray-300 mx-auto" />
-        <h2 className="mt-2 font-semibold text-xl">
+        <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-300 mx-auto text-xl text-black">
+          {selectedChatName ? (
+            selectedChatName
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2)
+          ) : (
+            <div></div>
+          )}
+        </div>
+        <h2 className="mt-2 font-semibold text-xl text-black">
           {selectedChatName}
         </h2>
         {/* <p className="text-gray-500">Active now</p> */}

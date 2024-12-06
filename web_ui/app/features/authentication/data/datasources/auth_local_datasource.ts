@@ -1,4 +1,6 @@
+import Cookies from "js-cookie";
 import { UserDataDto } from "../dto/UserData.dto";
+import { GetCredentialsDto } from "../dto/GetCredentials.dto";
 
 export class AuthLocalDataSource {
   private static readonly USER_ID_KEY = "user_id";
@@ -23,6 +25,41 @@ export class AuthLocalDataSource {
     } catch (e) {
       console.error("Failed to save user data:", e);
       throw new Error("Error saving user data.");
+    }
+  }
+
+  deleteCredentials(): void {
+    try {
+      localStorage.removeItem(AuthLocalDataSource.USER_ID_KEY);
+      localStorage.removeItem(AuthLocalDataSource.USERFULLNAME_KEY);
+      localStorage.removeItem(AuthLocalDataSource.USERNAME_KEY);
+      localStorage.removeItem(AuthLocalDataSource.ACCESS_TOKEN_KEY);
+
+      Cookies.remove("userName", { secure: true });
+      Cookies.remove("password", { secure: true });
+    } catch (e) {
+      console.error("Failed to delete user data:", e);
+      throw new Error("Error dleting user data.");
+    }
+  }
+
+  saveCredentials(userName: string, password: string): void {
+    try {
+      Cookies.set("userName", userName, { secure: true });
+      Cookies.set("password", password, { secure: true });
+    } catch (e) {
+      throw new Error("Error saving credentials.");
+    }
+  }
+
+  getCredentials(): GetCredentialsDto {
+    try {
+      const userName = Cookies.get("userName") ?? "";
+      const password = Cookies.get("password") ?? "";
+
+      return new GetCredentialsDto(userName, password);
+    } catch (e) {
+      throw new Error("Error saving credentials.");
     }
   }
 
