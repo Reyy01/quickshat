@@ -3,14 +3,13 @@ import { ChatRepository } from "../../domain/repositories/chat_repository";
 import { ConversationDataDto } from "../dto/ConversationData.dto";
 import { ChatRemoteDatasource } from "../datasources/chat_remote_datasource";
 import { ConversationsDataDto } from "../dto/ConversationsData.dto";
-import { Observable, of } from "rxjs";
-import { catchError, map } from "rxjs/operators";
+import { Observable, of, shareReplay } from "rxjs";
+import { catchError, finalize, map } from "rxjs/operators";
 import { ConversationsDto } from "../dto/Conversations.dto";
-import { sendMessage } from "../redux/chatSlice";
 
 export class ChatRepositoryImpl implements ChatRepository {
   constructor(private readonly chatRemoteDatasource: ChatRemoteDatasource) {}
-
+  private sharedStream$: Observable<Result<ConversationsDto>> | null = null;
   connectChatStream(): Observable<Result<ConversationsDto>> {
     let accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -21,6 +20,17 @@ export class ChatRepositoryImpl implements ChatRepository {
       map((data) => Result.success<ConversationsDto>(data)),
       catchError((error) => of(Result.failure<ConversationsDto>(error.message)))
     );
+  }
+
+  async disposeChatStream(): Promise<Result<void>> {
+    try {
+      this.chatRemoteDatasource.disposeChatStream();
+      return Result.success<void>(undefined);
+    } catch (error) {
+      return Result.failure<void>(
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    }
   }
 
   async getConversations(

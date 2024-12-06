@@ -3,24 +3,27 @@ import { ConversationDataDto } from "../dto/ConversationData.dto";
 import { config } from "@/app/core/config";
 import axios, { AxiosError } from "axios";
 import { ConversationsDataDto } from "../dto/ConversationsData.dto";
-import { Observable } from "rxjs";
+import { Observable, ReplaySubject, shareReplay } from "rxjs";
 import { ConversationsDto } from "../dto/Conversations.dto";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 export class ChatRemoteDatasource {
+  private eventSource: AbortController | null = null;
+
   connectChatStream(accessToken: string): Observable<ConversationsDto> {
     return new Observable<ConversationsDto>((observer) => {
-      // Set up the SSE connection with the authorization header
+      this.eventSource = new AbortController();
       fetchEventSource(`${config.quickChatSSEService}/chat/events`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "text/event-stream",
         },
+        signal: this.eventSource.signal,
         onopen: async (response) => {
           if (response.ok) {
             console.log("SSE connection opened.");
           } else {
-            observer.error(`Error: ${response.statusText}`);
+            observer.error(Error(response.statusText));
           }
         },
         onmessage(event) {
@@ -37,6 +40,7 @@ export class ChatRemoteDatasource {
             observer.error("Error parsing message data");
           }
         },
+
         onerror(error) {
           observer.error("SSE connection error");
           console.error("SSE Error:", error);
@@ -46,12 +50,20 @@ export class ChatRemoteDatasource {
           observer.complete();
         },
       });
-
-      // Clean up when the observable is unsubscribed
       return () => {
         console.log("SSE stream unsubscribed.");
       };
     });
+  }
+
+  async disposeChatStream(): Promise<void> {
+    if (this.eventSource) {
+      console.log("Disposing SSE connection...");
+
+      // Abort the fetch event source
+      this.eventSource.abort();
+      this.eventSource = null;
+    }
   }
 
   async getConversation(page: number): Promise<ConversationDataDto> {
@@ -76,7 +88,7 @@ export class ChatRemoteDatasource {
 
       throw new Error("Invalid response format");
     } catch (error) {
-      throw this.checkErrResponse(error);
+      throw new Error(`${error}`);
     }
   }
 
@@ -106,7 +118,7 @@ export class ChatRemoteDatasource {
 
       throw new Error("Invalid response format");
     } catch (error) {
-      throw this.checkErrResponse(error);
+      throw new Error(`${error}`);
     }
   }
 
@@ -134,36 +146,7 @@ export class ChatRemoteDatasource {
 
       throw new Error("Invalid response format");
     } catch (error) {
-      throw this.checkErrResponse(error);
+      throw new Error(`${error}`);
     }
-  }
-
-  // Private Methods
-  //
-  private checkErrResponse(error: any): Error {
-    if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<any>;
-      const response = axiosError.response;
-
-      if (!response) {
-        return new Error("No response received");
-      }
-
-      // Handle specific error cases
-      if (response.data?.message?.message === "jwt expired") {
-        return new Error("Session expired");
-      }
-
-      // Return the error message from the response if available
-      const errorMessage =
-        response.data?.message?.message ||
-        response.data?.message ||
-        response.data?.error ||
-        "Unknown error occurred";
-
-      return new Error(errorMessage);
-    }
-
-    return new Error("An unexpected error occurred");
   }
 }

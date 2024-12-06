@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import multer from "multer";
+import cors from "cors";
 
 /// [middleware imports]
 import { connectToDatabase } from "./middleware/MongoDB";
@@ -60,6 +61,16 @@ const chatController = new ChatController(
   chatSseUsecase,
   getConversationUsecase,
   getConversationsUsecase
+);
+
+// Enable CORS for specific origin
+app.use(
+  cors({
+    origin: "http://localhost:3001", // specify the allowed origin
+    methods: "GET,POST", // specify allowed methods
+    allowedHeaders: "Authorization,Content-Type,Cache-Control", // include Cache-Control
+    credentials: true, // include credentials if needed
+  })
 );
 
 app.use(bodyParser.json());

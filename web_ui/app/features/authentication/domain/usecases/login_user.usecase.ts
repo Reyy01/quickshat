@@ -1,5 +1,3 @@
-import { useAppDispatch } from "@/app/core/hooks";
-
 import { LoginUserDto } from "../../data/dto/LoginUser.dto";
 import { loginUser } from "../../data/redux/authSlice";
 

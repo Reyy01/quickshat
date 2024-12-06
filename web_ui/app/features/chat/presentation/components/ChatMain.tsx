@@ -18,7 +18,7 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
 
   // Usecases
   const getConversationsUsecase = new GetConversationsUsecase();
-  const connectChatStream = new ConnectChatStreamUsecase();
+  // const connectChatStream = new ConnectChatStreamUsecase();
   const sendMessageUsecase = new SendMessageUsecase()
 
   // references
@@ -34,12 +34,14 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
   const chat = useAppSelector((state) => state.chat);
   const auth = useAppSelector((state => state.auth));
   const { 
-    conversation,
+    
     selectedChatId,
     selectedChatName,
     conversations,
     conversationsList, 
+    conversation,
     conversationList,
+    isNewConversation,
   } = chat;
   const { loginDatas } = auth;
 
@@ -58,7 +60,7 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
         getConversationsDto: new GetConversationsDto(selectedChatName, selectedChatId, currentPage + 1)
       }, dispatch);
     }
-  }, [conversationsList, selectedChatId, dispatch]);
+  }, [conversationsList, selectedChatId]);
 
   const _handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop } = e.currentTarget;
@@ -74,9 +76,9 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
   };
 
   /// listeners
-  useEffect(() => {
-    connectChatStream.execute(dispatch)
-  },[]);
+  // useEffect(() => {
+  //   connectChatStream.execute(dispatch)
+  // },[dispatch]);
 
   useEffect(() => {
     console.log(`watda ${selectedChatName}`)
@@ -101,36 +103,47 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
     }
   }, [])
 
-  useEffect(() => {
-    document.addEventListener("keydown", function (event: any) {
-      console.log(`EEEE ${event.keyCode}`)
-      console.log(`lll ${event.target.nodeName}`)
-      console.log(`lll ${event.target.id}`)
-      if (event.keyCode === 13 && event.target.nodeName === "INPUT" && event.target.id === "message-input") {
+  // useEffect(() => {
+  //   document.addEventListener("keydown", function (event: any) {
+  //     console.log(`EEEE ${event.keyCode}`)
+  //     console.log(`lll ${event.target.nodeName}`)
+  //     console.log(`lll ${event.target.id}`)
+  //     if (event.keyCode === 13 && event.target.nodeName === "INPUT" && event.target.id === "message-input") {
        
-        if(message !== '' || message !== undefined || message !== null){
-          event.preventDefault();
-          console.log(`selectedChatName ${selectedChatName}`)
-          if(selectedChatName){
-            console.log(`message ${message}`)
-            sendMessageUsecase.execute({recipient: selectedChatName, content: message}, dispatch);
-            messageInputRef.current!.value  = ''
-          }  
-        }
-      //   var form = event.target.form;
-      //   var index = Array.prototype.indexOf.call(form, event.target);
-      //   form.elements[index + 2].focus();
-      //   event.preventDefault();
-      }
-    });
-  }, []);
+  //       if(message !== '' || message !== undefined || message !== null){
+  //         event.preventDefault();
+  //         console.log(`selectedChatName ${selectedChatName}`)
+  //         if(selectedChatName){
+  //           console.log(`message ${message}`)
+  //           sendMessageUsecase.execute({recipient: selectedChatName, content: message}, dispatch);
+  //           messageInputRef.current!.value  = ''
+  //         }  
+  //       }
+  //     //   var form = event.target.form;
+  //     //   var index = Array.prototype.indexOf.call(form, event.target);
+  //     //   form.elements[index + 2].focus();
+  //     //   event.preventDefault();
+  //     }
+  //   });
+  // }, []);
 
 
     return (
       <div className="flex-1 flex flex-col h-screen">
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 flex items-center">
-          <div className="w-10 h-10 rounded-full bg-gray-300" />
+          <div className="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 text-black">
+            {selectedChatName ? (
+              selectedChatName
+              .split(' ')
+              .map(word => word[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2)
+            ) : (
+              <div></div>
+            )}
+          </div>
           <div className="ml-3">
             <div className="font-semibold text-black">
               {selectedChatName}
@@ -165,7 +178,8 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
           
           {conversationsList?.map((conversation, index) => {
             const isMe = conversation.sender === (loginDatas?.user.userName ?? localStorage.getItem("username"));
-  
+            const recipient = filterRecipient(conversation.sender, conversation.recipient, localStorage.getItem("username"));
+            
             return (
               <div key={index} className="flex flex-shrink-0">
                 {isMe ? (
@@ -178,7 +192,16 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
                 ) : (
                   // Received message (align left)
                   <div className="flex items-end w-full">
-                    <div className="w-8 h-8 rounded-full bg-gray-300" />
+                    <div className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-400 text-white-600" >
+                    {
+                      recipient
+                      .split(' ')
+                      .map(word => word[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)
+                    }
+                    </div>
                     <div className="text-black ml-2 bg-gray-100 rounded-2xl rounded-bl-none p-3 max-w-md">
                       <span className='text-xs text-red-400 font-bold'>{conversation.sender}</span>
                       <p>{conversation.content}</p>
@@ -188,6 +211,23 @@ export const ChatMain: React.FC<ChatMainProps> = () => {
               </div>
             );
           })}
+
+          {conversationsList.length === 0 ? (
+            <div className="flex justify-center items-center h-full text-gray-500">
+              {isNewConversation ? (
+                <div>
+                  Compose a message below to start a conversation
+                </div>
+              ) : (
+                <div>
+                  Start a new or select a conversation
+                </div>
+              )}
+              
+            </div>
+          ) : (
+            <div></div>
+          )}
         </div>
   
         {/* Input area */}

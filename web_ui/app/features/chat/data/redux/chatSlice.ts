@@ -32,6 +32,7 @@ interface ChatState {
   isConversationsLoaded: boolean;
   selectedChatId: string | null;
   selectedChatName: string | null;
+  isNewConversation: boolean;
 }
 
 // initial
@@ -48,6 +49,7 @@ const initialState: ChatState = {
   isConversationsLoaded: false,
   selectedChatId: null,
   selectedChatName: null,
+  isNewConversation: false,
 };
 
 export const connectChatStream = createAsyncThunk<
@@ -59,6 +61,7 @@ export const connectChatStream = createAsyncThunk<
     chatRepository.connectChatStream();
   resultStream.subscribe({
     next: (message: Result<ConversationsDto>) => {
+      console.log(`MESSSS ${message.getValue.content}`);
       dispatch(chatSlice.actions.addConversation(message.getValue));
       return message.getValue;
     },
@@ -70,6 +73,17 @@ export const connectChatStream = createAsyncThunk<
     },
   });
 });
+
+export const disposeChatStream = createAsyncThunk(
+  "chat/disposeChatStream",
+  async () => {
+    const result = await chatRepository.disposeChatStream();
+    if (!result.isSuccess) {
+      throw new Error(result.getError);
+    }
+    return result.getValue;
+  }
+);
 
 export const getConversation = createAsyncThunk(
   "chat/getConversation",
@@ -127,6 +141,13 @@ export const changeChatStatus = createAsyncThunk(
   }
 );
 
+export const createNewConversation = createAsyncThunk(
+  "chat/createNewConversation",
+  async (userName: string, { dispatch }) => {
+    dispatch(chatSlice.actions.createNewConversation(userName));
+  }
+);
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -154,6 +175,11 @@ const chatSlice = createSlice({
     changeChatStatus: (state) => {
       state.isChatSent = false;
     },
+    createNewConversation: (state, action) => {
+      state.selectedChatName = action.payload;
+      state.isNewConversation = true;
+      state.conversationsList = [];
+    },
   },
   extraReducers: (builder) => {
     // getConversation
@@ -173,7 +199,12 @@ const chatSlice = createSlice({
           state.conversationList = action.payload.conversationList;
           state.isConversationLoaded = true;
         }
-      );
+      )
+      .addCase(getConversation.rejected, (state, action) => {
+        state.stateStatus = StateStatus.ERROR;
+        state.errorMessage =
+          action.error.message ?? "Failed to load conversation";
+      });
 
     //getConversations
     builder
@@ -202,6 +233,7 @@ const chatSlice = createSlice({
         // reset state
         state.stateStatus = StateStatus.LOADED;
         state.isConversationsLoaded = false;
+        state.isNewConversation = false;
       })
       .addCase(getConversations.rejected, (state, action) => {
         state.stateStatus = StateStatus.ERROR;
@@ -221,6 +253,31 @@ const chatSlice = createSlice({
       .addCase(sendMessage.rejected, (state, action) => {
         state.chatStatus = StateStatus.ERROR;
         state.errorMessage = action.error.message ?? "Failed to send Message";
+      });
+
+    // dipose / complete stream
+    builder
+      .addCase(disposeChatStream.pending, (state) => {
+        state.chatStatus = StateStatus.LOADING;
+      })
+      .addCase(disposeChatStream.fulfilled, (state, action) => {
+        state.errorMessage = null;
+        state.stateStatus = StateStatus.INITIAL;
+        state.chatStatus = StateStatus.INITIAL;
+        state.isChatSent = false;
+        state.conversation = null;
+        state.conversationList = [];
+        state.conversations = null;
+        state.conversationsList = [];
+        state.isConversationLoaded = false;
+        state.isConversationsLoaded = false;
+        state.selectedChatId = null;
+        state.selectedChatName = null;
+        state.isNewConversation = false;
+      })
+      .addCase(disposeChatStream.rejected, (state, action) => {
+        state.chatStatus = StateStatus.ERROR;
+        state.errorMessage = action.error.message ?? "error during disposing";
       });
   },
 });

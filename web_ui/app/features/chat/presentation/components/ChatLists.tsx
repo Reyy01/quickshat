@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/app/core/hooks';
 import { GetConversationUsecase } from '../../domain/usecases/getConversation.usecase';
@@ -9,6 +9,7 @@ import { filterRecipient } from '@/app/core/filterRecipient';
 import { ChangeChatStatusUsecase } from '../../domain/usecases/chageChatStatus.usecase';
 import { SearchUserComponent } from '@/app/features/user/presentation/component/SearchUser';
 import { GetConversationParamDto } from '../../data/dto/GetConversation.dto';
+import { DateUtils } from '@/app/core/dateUtils';
 
 interface ChatsListProps {}
 
@@ -100,10 +101,7 @@ export const ChatsList: React.FC<ChatsListProps> = () => {
                     }
                   </div>
                   <div className="text-xs text-gray-500">
-                    {new Date(e.timeStamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {DateUtils.formatTimeAgo(e.timeStamp)}
                   </div>
                 </div>
                 <div className="text-sm text-gray-400 truncate">
