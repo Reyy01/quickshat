@@ -56,6 +56,7 @@ import '../features/chat/usecase/DisposeChatData.usecase.dart' as _i433;
 import '../features/chat/usecase/DisposeChatStream.usecase.dart' as _i623;
 import '../features/chat/usecase/GetConversation.usecase.dart' as _i33;
 import '../features/chat/usecase/GetConversations.usecase.dart' as _i776;
+import '../features/chat/usecase/SelecUsername.usecase.dart' as _i452;
 import '../features/chat/usecase/SendChat.usecase.dart' as _i603;
 import '../features/user/data/bloc/user_bloc.dart' as _i1021;
 import '../features/user/data/datasources/user_local_datasource.dart' as _i147;
@@ -179,8 +180,10 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i468.RegisterUserUsecase(authBloc: gh<_i868.AuthBloc>()));
     gh.factory<_i424.GetCredentialsUsecase>(
         () => _i424.GetCredentialsUsecase(authBloc: gh<_i868.AuthBloc>()));
-    gh.lazySingleton<_i915.ChatsBloc>(
-        () => _i915.ChatsBloc(chatRepository: gh<_i394.ChatRepository>()));
+    gh.lazySingleton<_i915.ChatsBloc>(() => _i915.ChatsBloc(
+          chatRepository: gh<_i394.ChatRepository>(),
+          authRepository: gh<_i716.AuthRepository>(),
+        ));
     gh.factory<_i433.DisposeChatDataUsecase>(
         () => _i433.DisposeChatDataUsecase(chatBloc: gh<_i915.ChatsBloc>()));
     gh.factory<_i623.DisposeChatStreamUsecase>(
@@ -193,6 +196,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i106.ConnectChatStreamUsecase(chatBloc: gh<_i915.ChatsBloc>()));
     gh.factory<_i776.GetConversationsUsecase>(
         () => _i776.GetConversationsUsecase(chatBloc: gh<_i915.ChatsBloc>()));
+    gh.factory<_i452.SelectUsernameUsecase>(
+        () => _i452.SelectUsernameUsecase(chatBloc: gh<_i915.ChatsBloc>()));
     return this;
   }
 }
