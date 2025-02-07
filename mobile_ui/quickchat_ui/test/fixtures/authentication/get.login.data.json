@@ -1,0 +1,12 @@
+{
+    "data": {
+        "statusCode": 200,
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6InJpcmkyMjIiLCJleHAiOjE3Mzg5NDc1NjZ9.ePm197uzjqJXOkykUxpqpaAOZEdXbjC-c4OVqmBql28",
+        "user": {
+            "id": "3",
+            "name": "riri",
+            "userName": "riri222",
+            "profilePictureBlob": null
+        }
+    }
+}
