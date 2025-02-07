@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quickchat_ui/config.dart';
+import 'package:quickchat_ui/core/logic/error_messages.dart';
 import 'package:quickchat_ui/core/logic/server_exeption.dart';
 import 'package:quickchat_ui/features/authentication/data/dto/LoginData.dto.dart';
 import 'package:quickchat_ui/features/authentication/data/dto/LoginUser.dto.dart';
@@ -31,7 +32,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       response = await dio.head('${config.quickChatService}/test');
     } catch (e) {
-      throw checkErrResponse(response);
+      if (e is DioException) {
+        throw checkErrResponse(e.response);
+      } else {
+        throw ServerException(ERR_DEFAULT);
+      }
     }
 
     if (response.statusCode == 200) {
@@ -60,10 +65,12 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final Map<String, dynamic> result = response.data['data'];
 
       resultData = LoginDatasDto.fromJson(result);
-    } on DioException catch (e) {
-      throw checkErrResponse(e.response);
     } catch (e) {
-      throw checkErrResponse(response);
+      if (e is DioException) {
+        throw checkErrResponse(e.response);
+      } else {
+        throw ServerException(ERR_DEFAULT);
+      }
     }
 
     if (response.statusCode == 200) {
