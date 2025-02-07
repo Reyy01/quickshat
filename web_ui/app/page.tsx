@@ -1,7 +1,7 @@
 
 "use client";
 import { Provider } from 'react-redux';
-import { store } from '@/app/store';  // Adjust path if needed
+import { store } from '@/app/store'; 
 import { HomePage } from './pages/home';
 
 export default function MyApp() {
