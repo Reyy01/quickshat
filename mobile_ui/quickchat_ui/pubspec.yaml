@@ -63,6 +63,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.3
   build_runner: ^2.4.7
   freezed: ^2.4.5
   injectable_generator: ^2.4.1
