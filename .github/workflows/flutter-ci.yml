@@ -16,10 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Navigate to the Flutter project directory
-      - name: Change directory to Flutter project
-        run: cd mobile_ui/quickchat_ui
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2 #use(version 2) to install Flutter
         with:
@@ -27,6 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+        working-directory: mobile_ui/quickchat_ui
 
       - name: Run tests
         run: flutter test
+        working-directory: mobile_ui/quickchat_ui
