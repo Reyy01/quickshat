@@ -29,6 +29,9 @@ class NetworkInfoImpl implements NetworkInfo {
         case InternetConnectionStatus.disconnected:
           isConnected(false);
           break;
+        case InternetConnectionStatus.slow:
+          isConnected(true);
+          break;
       }
     });
   }
