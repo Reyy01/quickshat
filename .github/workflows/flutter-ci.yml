@@ -21,6 +21,10 @@ jobs:
         with:
           flutter-version: "3.24.1" # specify the Flutter version
 
+      - name: Check version
+        run: flutter --version
+        working-directory: mobile_ui/quickchat_ui
+
       - name: Install dependencies
         run: flutter pub get
         working-directory: mobile_ui/quickchat_ui
