@@ -33,5 +33,5 @@ abstract class DIContainer {
 
   @lazySingleton
   InternetConnectionChecker get internetConnectionChecker =>
-      InternetConnectionChecker();
+      InternetConnectionChecker.createInstance();
 }
